@@ -16,7 +16,7 @@ func (e *NoCredFoundError) Error() string {
 	return fmt.Sprintf("no credentials found for %s", e.CredentialName)
 }
 
-func getCredUnsafe(l *zap.SugaredLogger, value string) string {
+func GetCredUnsafe(l *zap.SugaredLogger, value string) string {
 	cred := os.Getenv(value)
 	if cred == "" {
 		l.Fatal(value + " is not set")
@@ -26,7 +26,7 @@ func getCredUnsafe(l *zap.SugaredLogger, value string) string {
 	return cred
 }
 
-func getCred(l *zap.SugaredLogger, value string) (string, error) {
+func GetCred(l *zap.SugaredLogger, value string) (string, error) {
 	cred := os.Getenv(value)
 	if cred == "" {
 		noCredError := &NoCredFoundError{
