@@ -1,4 +1,4 @@
-package gocore
+package utils
 
 import (
 	"encoding/json"
