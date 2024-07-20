@@ -60,7 +60,7 @@ func GinHandler(l *zap.SugaredLogger, callback func(webhook WebhookCallback) err
 		err := ConsumeWebhookCallback(c.Request.Body, callback)
 		if err != nil {
 			if devErr, ok := err.(*utils.DeveloperError); ok {
-				l.Error(devErr.Message)
+				l.Error(devErr)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": devErr.Error()})
 				return
 			}
