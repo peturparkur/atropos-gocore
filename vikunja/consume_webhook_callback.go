@@ -53,7 +53,7 @@ func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCal
 }
 
 // ConsumeWebhookCallbackWithGin is a helper function to consume a webhook callback with gin
-func ConsumeWebhookCallbackWithGin(callback func(webhook WebhookCallback) error) func(c *gin.Context) {
+func GinHandler(callback func(webhook WebhookCallback) error) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		err := ConsumeWebhookCallback(c.Request.Body, callback)
 		if err != nil {

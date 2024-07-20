@@ -7,9 +7,20 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	"go.uber.org/zap"
 )
+
+// APIError is an error type that is returned when an API request fails.
+type APIError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e *APIError) Error() string {
+	return "API request failed with status code " + strconv.Itoa(e.StatusCode) + ": " + e.Message
+}
 
 // MakeAPIRequest is a generic function to make an API request. It supports GET, POST, PUT, and DELETE requests.
 func MakeAPIRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
@@ -68,6 +79,10 @@ func MakeAPIRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token stri
 	if err := json.Unmarshal(body, &response); err != nil {
 		l.Errorw("Failed to unmarshal response", "error", err, "body", string(body))
 		return err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return &APIError{StatusCode: resp.StatusCode, Message: string(body)}
 	}
 
 	return nil
