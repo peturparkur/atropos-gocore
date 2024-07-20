@@ -28,7 +28,7 @@ The typical usage is as follows:
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
 	}
 */
-func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCallback) error) error {
+func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback func(webhook WebhookCallback) error) error {
 	defer body.Close()
 	bytes, err := io.ReadAll(body)
 	if err != nil {
@@ -36,6 +36,7 @@ func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCal
 	}
 	stringedEvents := [][]string{}
 	if err := json.Unmarshal(bytes, &stringedEvents); err != nil {
+		l.Errorw("Failed to unmarshal webhook callback", "error", err, "body", string(bytes))
 		return err
 	}
 
@@ -43,6 +44,7 @@ func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCal
 		for _, e := range le {
 			event := WebhookCallback{}
 			if err := json.Unmarshal([]byte(e), &event); err != nil {
+				l.Errorw("Failed to unmarshal webhook event", "event", e)
 				return err
 			}
 			if err := callback(event); err != nil {
@@ -57,7 +59,7 @@ func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCal
 // GinHandler is a helper function to consume a webhook callback with gin
 func GinHandler(l *zap.SugaredLogger, callback func(webhook WebhookCallback) error) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		err := ConsumeWebhookCallback(c.Request.Body, callback)
+		err := ConsumeWebhookCallback(l, c.Request.Body, callback)
 		if err != nil {
 			if devErr, ok := err.(*utils.DeveloperError); ok {
 				l.Error(devErr)
