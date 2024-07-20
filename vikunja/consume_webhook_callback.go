@@ -65,6 +65,7 @@ func GinHandler(l *zap.SugaredLogger, callback func(webhook WebhookCallback) err
 				return
 			}
 
+			l.Error(err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
