@@ -6,39 +6,18 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"reflect"
 
 	"go.uber.org/zap"
 )
 
-// APIClient is a struct that contains the base URL of the API and the token to use for requests.
-type APIClient struct {
-	BaseURL string
-	Token   string
-	Logger  *zap.SugaredLogger
-}
-
-// NewAPIClient creates a new APIClient with the specified baseURL and token.
-func (c *APIClient) Delete(endpoint string, response interface{}) error {
-	return MakeDeleteRequest(c.Logger, c.BaseURL, endpoint, c.Token, response)
-}
-
-// Get is a helper function to make a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func (c *APIClient) Get(endpoint string, response interface{}) error {
-	return MakeGetRequest(c.Logger, c.BaseURL, endpoint, c.Token, response)
-}
-
-// Post is a helper function to make a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func (c *APIClient) Post(endpoint string, request, response interface{}) error {
-	return MakePostRequest(c.Logger, c.BaseURL, endpoint, c.Token, request, response)
-}
-
-// Put is a helper function to make a PUT request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func (c *APIClient) Put(endpoint string, request, response interface{}) error {
-	return MakePutRequest(c.Logger, c.BaseURL, endpoint, c.Token, request, response)
-}
-
 // MakeAPIRequest is a generic function to make an API request. It supports GET, POST, PUT, and DELETE requests.
-func MakeApiRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
+func MakeAPIRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
+	// If response is not nil, check its a pointer (easy dev mistake to make).
+	if reflect.ValueOf(response).Kind() != reflect.Ptr {
+		return &DeveloperError{"response provided must be a pointer"}
+	}
+
 	var jsonData []byte
 	var err error
 
@@ -59,7 +38,7 @@ func MakeApiRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token stri
 		buf := bytes.NewBuffer(jsonData)
 		req, err = http.NewRequest(kind, apiBaseURL+endpoint, buf)
 	} else {
-		req, err = http.NewRequest(kind, apiBaseURL+endpoint)
+		req, err = http.NewRequest(kind, apiBaseURL+endpoint, nil)
 	}
 
 	if err != nil {
@@ -96,20 +75,20 @@ func MakeApiRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token stri
 
 // MakeDeleteRequest is a helper function to make a DELETE request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
 func MakeDeleteRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, response interface{}) error {
-	return MakeApiRequest(l, "DELETE", apiBaseURL, endpoint, token, nil, response)
+	return MakeAPIRequest(l, "DELETE", apiBaseURL, endpoint, token, nil, response)
 }
 
 // MakeGetRequest is a helper function to make a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
 func MakeGetRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, response interface{}) error {
-	return MakeApiRequest(l, "GET", apiBaseURL, endpoint, token, nil, response)
+	return MakeAPIRequest(l, "GET", apiBaseURL, endpoint, token, nil, response)
 }
 
 // MakePostRequest is a helper function to make a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
 func MakePostRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request, response interface{}) error {
-	return MakeApiRequest(l, "POST", apiBaseURL, endpoint, token, request, response)
+	return MakeAPIRequest(l, "POST", apiBaseURL, endpoint, token, request, response)
 }
 
 // MakePutRequest is a helper function to make a PUT request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
 func MakePutRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request, response interface{}) error {
-	return MakeApiRequest(l, "PUT", apiBaseURL, endpoint, token, request, response)
+	return MakeAPIRequest(l, "PUT", apiBaseURL, endpoint, token, request, response)
 }

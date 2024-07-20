@@ -1,21 +1,13 @@
+// Package utils contains utility functions that are used throughout the application.
 package utils
 
 import (
-	"fmt"
 	"os"
 
 	"go.uber.org/zap"
 )
 
-// NoCredFoundError represents an error when no credentials are found
-type NoCredFoundError struct {
-	CredentialName string
-}
-
-func (e *NoCredFoundError) Error() string {
-	return fmt.Sprintf("no credentials found for %s", e.CredentialName)
-}
-
+// GetCredUnsafe is a function that gets a credential from the environment variables. If the credential is not found, it will log a fatal error.
 func GetCredUnsafe(l *zap.SugaredLogger, value string) string {
 	cred := os.Getenv(value)
 	if cred == "" {
@@ -26,6 +18,7 @@ func GetCredUnsafe(l *zap.SugaredLogger, value string) string {
 	return cred
 }
 
+// GetCred is a function that gets a credential from the environment variables. If the credential is not found, it will return an error.
 func GetCred(l *zap.SugaredLogger, value string) (string, error) {
 	cred := os.Getenv(value)
 	if cred == "" {
