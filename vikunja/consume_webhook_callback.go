@@ -43,7 +43,7 @@ func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback f
 	}
 
 	event := WebhookCallback{}
-	if b, ok := obj["body"]; !ok {
+	if b, ok := obj["body"]; ok {
 		bStr := b.(string)
 
 		if err := json.Unmarshal([]byte(bStr), &event); err != nil {
