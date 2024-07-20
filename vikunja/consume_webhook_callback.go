@@ -36,7 +36,7 @@ func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback f
 	}
 
 	// Figure out if it has body and i need to unpack it or its already unpacked
-	obj := map[string]interface{}{}
+	obj := map[string]interface{}(nil)
 	if err := json.Unmarshal(bytes, &obj); err != nil {
 		l.Errorw("Failed to unmarshal webhook event", "event", string(bytes))
 		return err
