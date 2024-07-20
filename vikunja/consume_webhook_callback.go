@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/atropos112/gocore/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,11 +53,16 @@ func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCal
 	return nil
 }
 
-// ConsumeWebhookCallbackWithGin is a helper function to consume a webhook callback with gin
+// GinHandler is a helper function to consume a webhook callback with gin
 func GinHandler(callback func(webhook WebhookCallback) error) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		err := ConsumeWebhookCallback(c.Request.Body, callback)
 		if err != nil {
+			if devErr, ok := err.(*utils.DeveloperError); ok {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": devErr.Error()})
+				return
+			}
+
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
