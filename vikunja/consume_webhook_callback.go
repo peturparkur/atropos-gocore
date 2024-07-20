@@ -8,6 +8,7 @@ import (
 
 	"github.com/atropos112/gocore/utils"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 /*
@@ -54,11 +55,12 @@ func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCal
 }
 
 // GinHandler is a helper function to consume a webhook callback with gin
-func GinHandler(callback func(webhook WebhookCallback) error) func(c *gin.Context) {
+func GinHandler(l *zap.SugaredLogger, callback func(webhook WebhookCallback) error) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		err := ConsumeWebhookCallback(c.Request.Body, callback)
 		if err != nil {
 			if devErr, ok := err.(*utils.DeveloperError); ok {
+				l.Error(devErr.Message)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": devErr.Error()})
 				return
 			}
