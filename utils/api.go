@@ -1,3 +1,4 @@
+// Package utils contains utility functions that are used throughout the application.
 package utils
 
 import (
@@ -9,15 +10,67 @@ import (
 	"go.uber.org/zap"
 )
 
-// MakeGetRequest makes a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakeGetRequest[responseType any](l *zap.SugaredLogger, apiBaseURL, endpoint, token string, response *responseType) error {
-	req, err := http.NewRequest("GET", apiBaseURL+endpoint, nil)
+// APIClient is a struct that contains the base URL of the API and the token to use for requests.
+type APIClient struct {
+	BaseURL string
+	Token   string
+	Logger  *zap.SugaredLogger
+}
+
+// NewAPIClient creates a new APIClient with the specified baseURL and token.
+func (c *APIClient) Delete(endpoint string, response interface{}) error {
+	return MakeDeleteRequest(c.Logger, c.BaseURL, endpoint, c.Token, response)
+}
+
+// Get is a helper function to make a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
+func (c *APIClient) Get(endpoint string, response interface{}) error {
+	return MakeGetRequest(c.Logger, c.BaseURL, endpoint, c.Token, response)
+}
+
+// Post is a helper function to make a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
+func (c *APIClient) Post(endpoint string, request, response interface{}) error {
+	return MakePostRequest(c.Logger, c.BaseURL, endpoint, c.Token, request, response)
+}
+
+// Put is a helper function to make a PUT request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
+func (c *APIClient) Put(endpoint string, request, response interface{}) error {
+	return MakePutRequest(c.Logger, c.BaseURL, endpoint, c.Token, request, response)
+}
+
+// MakeAPIRequest is a generic function to make an API request. It supports GET, POST, PUT, and DELETE requests.
+func MakeApiRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
+	var jsonData []byte
+	var err error
+
+	if request != nil {
+		if kind == "GET" || kind == "DELETE" {
+			l.Fatalw("GET and DELETE requests do not support request bodies", "kind", kind)
+		}
+
+		jsonData, err = json.Marshal(request)
+		if err != nil {
+			return err
+		}
+	}
+
+	var buf *bytes.Buffer
+	if request != nil {
+		buf = bytes.NewBuffer(jsonData)
+	} else {
+		buf = nil
+	}
+
+	req, err := http.NewRequest(kind, apiBaseURL+endpoint, buf)
 	if err != nil {
 		return err
 	}
 
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	}
+
+	if request != nil {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	client := &http.Client{}
@@ -40,121 +93,22 @@ func MakeGetRequest[responseType any](l *zap.SugaredLogger, apiBaseURL, endpoint
 	return nil
 }
 
-// MakePostRequest makes a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakePostRequest[requestType, responseType any](l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request requestType, response *responseType) error {
-	jsonData, err := json.Marshal(request)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("POST", apiBaseURL+endpoint, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return err
-	}
-
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal(body, &response); err != nil {
-		l.Errorw("Failed to unmarshal response", "error", err, "body", string(body))
-		return err
-	}
-
-	return nil
+// MakeDeleteRequest is a helper function to make a DELETE request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
+func MakeDeleteRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, response interface{}) error {
+	return MakeApiRequest(l, "DELETE", apiBaseURL, endpoint, token, nil, response)
 }
 
-// MakePutRequest makes a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakePutRequest[requestType, responseType any](l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request requestType, response *responseType) error {
-	jsonData, err := json.Marshal(request)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("PUT", apiBaseURL+endpoint, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return err
-	}
-
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal(body, &response); err != nil {
-		l.Errorw("Failed to unmarshal response", "error", err, "body", string(body))
-		return err
-	}
-
-	return nil
+// MakeGetRequest is a helper function to make a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
+func MakeGetRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, response interface{}) error {
+	return MakeApiRequest(l, "GET", apiBaseURL, endpoint, token, nil, response)
 }
 
-///
+// MakePostRequest is a helper function to make a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
+func MakePostRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request, response interface{}) error {
+	return MakeApiRequest(l, "POST", apiBaseURL, endpoint, token, request, response)
+}
 
-//
-// func makeAPIRequest[respType any](_ *zap.SugaredLogger, token, apiURL, endpoint, kind string, res *respType, msg interface{}) error {
-// 	var req *http.Request
-// 	var err error
-//
-// 	if kind == "POST" || kind == "PUT" {
-// 		jsonData, err := json.Marshal(msg)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		req, err = http.NewRequest(kind, apiURL+endpoint, bytes.NewBuffer(jsonData))
-// 	} else {
-// 		req, err = http.NewRequest(kind, apiURL+endpoint, nil)
-// 	}
-//
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	if token != "" {
-// 		req.Header.Set("Authorization", "Bearer "+token)
-// 	}
-// 	if kind == "POST" || kind == "PUT" {
-// 		req.Header.Set("Content-Type", "application/json")
-// 	}
-//
-// 	client := &http.Client{}
-// 	resp, err := client.Do(req)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer resp.Body.Close()
-// 	body, err := io.ReadAll(resp.Body)
-//
-// 	// Unmarshal the response into a struct
-// 	err = json.Unmarshal(body, &res)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	return nil
-// }
+// MakePutRequest is a helper function to make a PUT request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
+func MakePutRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request, response interface{}) error {
+	return MakeApiRequest(l, "PUT", apiBaseURL, endpoint, token, request, response)
+}
