@@ -1,7 +1,7 @@
-// This package contains the types that are used in the Vikunja API
+// Package vikunja contains the types that are used in the Vikunja API
 package vikunja
 
-// VikunjaOwner is a struct that represents an owner in Vikunja
+// Owner is a struct that represents an owner in Vikunja
 type Owner struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
@@ -10,6 +10,7 @@ type Owner struct {
 	Updated  string `json:"updated"`
 }
 
+// Doer is a struct that represents a doer in Vikunja
 type Doer Owner
 
 // Project is a struct that represents a project in Vikunja
