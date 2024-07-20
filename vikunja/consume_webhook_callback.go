@@ -34,23 +34,14 @@ func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback f
 	if err != nil {
 		return err
 	}
-	stringedEvents := [][]string{}
-	if err := json.Unmarshal(bytes, &stringedEvents); err != nil {
-		l.Errorw("Failed to unmarshal webhook callback", "error", err, "body", string(bytes))
+
+	event := WebhookCallback{}
+	if err := json.Unmarshal(bytes, &event); err != nil {
+		l.Errorw("Failed to unmarshal webhook event", "event", string(bytes))
 		return err
 	}
-
-	for _, le := range stringedEvents {
-		for _, e := range le {
-			event := WebhookCallback{}
-			if err := json.Unmarshal([]byte(e), &event); err != nil {
-				l.Errorw("Failed to unmarshal webhook event", "event", e)
-				return err
-			}
-			if err := callback(event); err != nil {
-				return err
-			}
-		}
+	if err := callback(event); err != nil {
+		return err
 	}
 
 	return nil
