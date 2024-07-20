@@ -18,15 +18,6 @@ type APIClient struct {
 }
 
 // NewAPIClient creates a new APIClient with the specified baseURL and token.
-func NewAPIClient(baseURL, token string, logger *zap.SugaredLogger) *APIClient {
-	return &APIClient{
-		BaseURL: baseURL,
-		Token:   token,
-		Logger:  logger,
-	}
-}
-
-// NewAPIClient creates a new APIClient with the specified baseURL and token.
 func (c *APIClient) Delete(endpoint string, response interface{}) error {
 	return MakeDeleteRequest(c.Logger, c.BaseURL, endpoint, c.Token, response)
 }
@@ -62,14 +53,15 @@ func MakeApiRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token stri
 		}
 	}
 
-	var buf *bytes.Buffer
+	var req *http.Request
+
 	if request != nil {
-		buf = bytes.NewBuffer(jsonData)
+		buf := bytes.NewBuffer(jsonData)
+		req, err = http.NewRequest(kind, apiBaseURL+endpoint, buf)
 	} else {
-		buf = nil
+		req, err = http.NewRequest(kind, apiBaseURL+endpoint)
 	}
 
-	req, err := http.NewRequest(kind, apiBaseURL+endpoint, buf)
 	if err != nil {
 		return err
 	}
