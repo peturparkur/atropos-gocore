@@ -35,12 +35,18 @@ func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback f
 		return err
 	}
 
-	eventInBody := map[string]WebhookCallback{}
+	eventInBody := map[string]string{}
 	if err := json.Unmarshal(bytes, &eventInBody); err != nil {
 		l.Errorw("Failed to unmarshal webhook event", "event", string(bytes))
 		return err
 	}
-	event := eventInBody["body"]
+
+	eventString := eventInBody["body"]
+	event := WebhookCallback{}
+	if err := json.Unmarshal([]byte(eventString), &event); err != nil {
+		l.Errorw("Failed to unmarshal webhook event", "event", string(bytes))
+		return err
+	}
 
 	if err := callback(event); err != nil {
 		return err
