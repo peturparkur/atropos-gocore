@@ -1,8 +1,8 @@
 // Package vikunja contains the types that are used in the Vikunja API
 package vikunja
 
-// Owner is a struct that represents an owner in Vikunja
-type Owner struct {
+// User is a struct that represents a user in Vikunja
+type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
 	Username string `json:"username"`
@@ -10,8 +10,14 @@ type Owner struct {
 	Updated  string `json:"updated"`
 }
 
+// Owner is a struct that represents an owner in Vikunja
+type Owner User
+
 // Doer is a struct that represents a doer in Vikunja
-type Doer Owner
+type Doer User
+
+// Author is a struct that represents an author in Vikunja
+type Author User
 
 // Project is a struct that represents a project in Vikunja
 type Project struct {
@@ -89,4 +95,12 @@ type WebhookCallback struct {
 	EventName string              `json:"event_name"`
 	Time      string              `json:"time"`
 	Data      WebhookCallbackData `json:"data"`
+}
+
+type Comment struct {
+	ID      int    `json:"id"`
+	Comment string `json:"comment"`
+	Author  Author `json:"author"`
+	Created string `json:"created"`
+	Updated string `json:"updated"`
 }
