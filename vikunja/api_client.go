@@ -84,7 +84,7 @@ func (c *Client) CreateProjectWebhook(projectID int, webhook Webhook) (Webhook, 
 	webhookRes := Webhook{}
 	projectIDstr := strconv.Itoa(projectID)
 
-	if err := apiClient.Post("/projects/"+projectIDstr+"/webhooks", webhook, &webhookRes); err != nil {
+	if err := apiClient.Put("/projects/"+projectIDstr+"/webhooks", webhook, &webhookRes); err != nil {
 		return Webhook{}, err
 	}
 
