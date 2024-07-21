@@ -50,3 +50,13 @@ type DeveloperError struct {
 func (e *DeveloperError) Error() string {
 	return fmt.Sprintf("developer error: %s", e.Message)
 }
+
+type GPTDoesntListenError struct {
+	UserMessage string
+	SysMessage  string
+}
+
+func (e *GPTDoesntListenError) Error() string {
+	// Write sys message and user message to log and return
+	return fmt.Sprintf("GPT doesn't listen, sys message: %s, user message: %s", e.SysMessage, e.UserMessage)
+}

@@ -10,15 +10,6 @@ type User struct {
 	Updated  string `json:"updated"`
 }
 
-// Owner is a struct that represents an owner in Vikunja
-type Owner User
-
-// Doer is a struct that represents a doer in Vikunja
-type Doer User
-
-// Author is a struct that represents an author in Vikunja
-type Author User
-
 // Project is a struct that represents a project in Vikunja
 type Project struct {
 	ID                    int         `json:"id"`
@@ -34,7 +25,7 @@ type Project struct {
 	Identifier            string      `json:"identifier"`
 	IsArchived            bool        `json:"is_archived"`
 	IsFavorite            bool        `json:"is_favorite"`
-	Owner                 Owner       `json:"owner"`
+	Owner                 User        `json:"owner"`
 	ParentProjectID       int         `json:"parent_project_id"`
 	BackgroundInformation interface{} `json:"background_information"`
 }
@@ -55,7 +46,7 @@ type Task struct {
 	StartDate              string      `json:"start_date"`
 	EndDate                string      `json:"end_date"`
 	Assignees              interface{} `json:"assignees"`
-	Labels                 interface{} `json:"labels"`
+	Labels                 []Label     `json:"labels"`
 	HexColor               string      `json:"hex_color"`
 	PercentDone            int         `json:"percent_done"`
 	Identifier             string      `json:"identifier"`
@@ -69,7 +60,7 @@ type Task struct {
 	BucketID               int         `json:"bucket_id"`
 	Position               float64     `json:"position"`
 	KanbanPosition         float64     `json:"kanban_position"`
-	CreatedBy              Owner       `json:"created_by"`
+	CreatedBy              User        `json:"created_by"`
 }
 
 // Webhook represents a webhook in Vikunja
@@ -81,12 +72,12 @@ type Webhook struct {
 	Secret    *string  `json:"secret,omitempty"`
 	Created   *string  `json:"created,omitempty"`
 	Updated   *string  `json:"updated,omitempty"`
-	CreatedBy *Owner   `json:"created_by,omitempty"`
+	CreatedBy *User    `json:"created_by,omitempty"`
 }
 
 // WebhookCallbackData represents the data that is sent to a webhook callback
 type WebhookCallbackData struct {
-	Doer Doer `json:"doer"`
+	Doer User `json:"doer"`
 	Task Task `json:"task"`
 }
 
@@ -100,7 +91,17 @@ type WebhookCallback struct {
 type Comment struct {
 	ID      int    `json:"id"`
 	Comment string `json:"comment"`
-	Author  Author `json:"author"`
+	Author  User   `json:"author"`
 	Created string `json:"created"`
 	Updated string `json:"updated"`
+}
+
+type Label struct {
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	HexColor    string `json:"hex_color"`
+	CreatedBy   User   `json:"created_by"`
+	Created     string `json:"created"`
+	Updated     string `json:"updated"`
 }
