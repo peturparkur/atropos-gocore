@@ -52,6 +52,19 @@ func (c *Client) GetProjects() ([]Project, error) {
 	return projects, nil
 }
 
+// GetProject returns a specific project
+func (c *Client) GetProject(projectID int) (Project, error) {
+	apiClient := utils.APIClient(*c)
+	project := Project{}
+	projectIDstr := strconv.Itoa(projectID)
+
+	if err := apiClient.Get("/projects/"+projectIDstr, &project); err != nil {
+		return Project{}, err
+	}
+
+	return project, nil
+}
+
 // GetProjectWebhooks returns a list of webhooks for a project
 func (c *Client) GetProjectWebhooks(projectID int) ([]Webhook, error) {
 	apiClient := utils.APIClient(*c)
@@ -122,6 +135,30 @@ func (c *Client) UpdateTask(task Task) (Task, error) {
 	taskIDstr := strconv.Itoa(task.ID)
 
 	err := apiClient.Post("/tasks/"+taskIDstr, task, &resp)
+
+	return resp, err
+}
+
+func (c *Client) GetAllLabels() ([]Label, error) {
+	apiClient := utils.APIClient(*c)
+	labels := []Label{}
+
+	if err := apiClient.Get("/labels", &labels); err != nil {
+		return nil, err
+	}
+
+	return labels, nil
+}
+
+func (c *Client) AddLabelToTask(taskID, labelID int) (LabelID, error) {
+	apiClient := utils.APIClient(*c)
+	taskIDstr := strconv.Itoa(taskID)
+
+	req := LabelID{
+		ID: labelID,
+	}
+	resp := LabelID{}
+	err := apiClient.Put("/tasks/"+taskIDstr+"/labels", req, &resp)
 
 	return resp, err
 }

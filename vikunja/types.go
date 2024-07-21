@@ -105,3 +105,9 @@ type Label struct {
 	Created     string `json:"created"`
 	Updated     string `json:"updated"`
 }
+
+// LabelID is a struct used to communicate to vikunja which label you are after. It is not the ID field in Label though.
+type LabelID struct {
+	ID      int    `json:"label_id"`
+	Created string `json:"created,omitempty"`
+}
