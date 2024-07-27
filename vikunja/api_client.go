@@ -102,6 +102,30 @@ func (c *Client) UpdateProjectWebhook(projectID int, webhook Webhook) (Webhook, 
 	return res, err
 }
 
+// GetProjectTasks returns a list of tasks for a project
+func (c *Client) GetProjectTasks(projectID int) ([]Task, error) {
+	apiClient := utils.APIClient(*c)
+	tasks := []Task{}
+	projectIDstr := strconv.Itoa(projectID)
+
+	if err := apiClient.Get("/projects/"+projectIDstr+"/tasks", &tasks); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+// UpdateProject updates a project
+func (c *Client) UpdateProject(project Project) (Project, error) {
+	apiClient := utils.APIClient(*c)
+	projectIDstr := strconv.Itoa(project.ID)
+
+	res := Project{}
+	err := apiClient.Post("/projects/"+projectIDstr, project, &res)
+
+	return res, err
+}
+
 // GetTaskComments returns a list of comments for a task
 func (c *Client) GetTaskComments(taskID int) ([]Comment, error) {
 	apiClient := utils.APIClient(*c)
