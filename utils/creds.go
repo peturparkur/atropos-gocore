@@ -2,20 +2,18 @@
 package utils
 
 import (
+	"log"
 	"log/slog"
 	"os"
-
-	"go.uber.org/zap"
 )
 
 // GetCredUnsafe is a function that gets a credential from the environment variables. If the credential is not found, it will log a fatal error.
-func GetCredUnsafe(l *zap.SugaredLogger, value string) string {
-	cred := os.Getenv(value)
-	if cred == "" {
-		l.Fatal(value + " is not set")
+func GetCredUnsafe(value string) string {
+	cred, err := GetCred(value)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	l.Info("Found " + value)
 	return cred
 }
 
