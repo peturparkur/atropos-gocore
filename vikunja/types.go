@@ -32,35 +32,35 @@ type Project struct {
 
 // Task represents a task in Vikunja
 type Task struct {
-	ID                     int               `json:"id"`
-	Title                  string            `json:"title"`
-	Description            string            `json:"description"`
-	Done                   bool              `json:"done"`
-	DoneAt                 string            `json:"done_at"`
-	DueDate                string            `json:"due_date"`
-	Reminders              interface{}       `json:"reminders"`
-	ProjectID              int               `json:"project_id"`
-	RepeatAfter            int               `json:"repeat_after"`
-	RepeatMode             int               `json:"repeat_mode"`
-	Priority               int               `json:"priority"`
-	StartDate              string            `json:"start_date"`
-	EndDate                string            `json:"end_date"`
-	Assignees              interface{}       `json:"assignees"`
-	Labels                 []Label           `json:"labels"`
-	HexColor               string            `json:"hex_color"`
-	PercentDone            int               `json:"percent_done"`
-	Identifier             string            `json:"identifier"`
-	Index                  int               `json:"index"`
-	RelatedTasks           map[string][]Task `json:"related_tasks,omitempty"`
-	Attachments            interface{}       `json:"attachments"`
-	CoverImageAttachmentID int               `json:"cover_image_attachment_id"`
-	IsFavorite             bool              `json:"is_favorite"`
-	Created                string            `json:"created"`
-	Updated                string            `json:"updated"`
-	BucketID               int               `json:"bucket_id"`
-	Position               float64           `json:"position"`
-	KanbanPosition         float64           `json:"kanban_position"`
-	CreatedBy              User              `json:"created_by"`
+	ID                     int                    `json:"id"`
+	Title                  string                 `json:"title"`
+	Description            string                 `json:"description"`
+	Done                   bool                   `json:"done"`
+	DoneAt                 string                 `json:"done_at"`
+	DueDate                string                 `json:"due_date"`
+	Reminders              interface{}            `json:"reminders"`
+	ProjectID              int                    `json:"project_id"`
+	RepeatAfter            int                    `json:"repeat_after"`
+	RepeatMode             int                    `json:"repeat_mode"`
+	Priority               int                    `json:"priority"`
+	StartDate              string                 `json:"start_date"`
+	EndDate                string                 `json:"end_date"`
+	Assignees              interface{}            `json:"assignees"`
+	Labels                 []Label                `json:"labels"`
+	HexColor               string                 `json:"hex_color"`
+	PercentDone            int                    `json:"percent_done"`
+	Identifier             string                 `json:"identifier"`
+	Index                  int                    `json:"index"`
+	RelatedTasks           map[string]interface{} `json:"related_tasks,omitempty"` // Marking this with []Task instead of interface{} causes parsing errors...
+	Attachments            interface{}            `json:"attachments"`
+	CoverImageAttachmentID int                    `json:"cover_image_attachment_id"`
+	IsFavorite             bool                   `json:"is_favorite"`
+	Created                string                 `json:"created"`
+	Updated                string                 `json:"updated"`
+	BucketID               int                    `json:"bucket_id"`
+	Position               float64                `json:"position"`
+	KanbanPosition         float64                `json:"kanban_position"`
+	CreatedBy              User                   `json:"created_by"`
 }
 
 // Webhook represents a webhook in Vikunja
