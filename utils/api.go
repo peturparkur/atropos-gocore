@@ -4,12 +4,15 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"log"
+	"log/slog"
 	"net/http"
 	"reflect"
 	"strconv"
 
-	"go.uber.org/zap"
+	sloghttp "github.com/samber/slog-http"
 )
 
 // APIError is an error type that is returned when an API request fails.
@@ -23,7 +26,8 @@ func (e *APIError) Error() string {
 }
 
 // MakeAPIRequest is a generic function to make an API request. It supports GET, POST, PUT, and DELETE requests.
-func MakeAPIRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
+func MakeAPIRequest(kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
+	l := slog.Default().With("kind", kind, "apiBaseURL", apiBaseURL, "endpoint", endpoint)
 	// If response is not nil, check its a pointer (easy dev mistake to make).
 	if reflect.ValueOf(response).Kind() != reflect.Ptr {
 		return &DeveloperError{"response provided must be a pointer"}
@@ -34,7 +38,8 @@ func MakeAPIRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token stri
 
 	if request != nil {
 		if kind == "GET" || kind == "DELETE" {
-			l.Fatalw("GET and DELETE requests do not support request bodies", "kind", kind)
+			l.Error("GET and DELETE requests do not support request bodies", "kind", kind)
+			return &DeveloperError{"GET and DELETE requests do not support request bodies"}
 		}
 
 		jsonData, err = json.Marshal(request)
@@ -77,7 +82,7 @@ func MakeAPIRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token stri
 	}
 
 	if err := json.Unmarshal(body, &response); err != nil {
-		l.Errorw("Failed to unmarshal response", "error", err, "body", string(body))
+		l.Error("Failed to unmarshal response", "error", err, "body", string(body))
 		return err
 	}
 
@@ -89,21 +94,42 @@ func MakeAPIRequest(l *zap.SugaredLogger, kind, apiBaseURL, endpoint, token stri
 }
 
 // MakeDeleteRequest is a helper function to make a DELETE request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakeDeleteRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, response interface{}) error {
-	return MakeAPIRequest(l, "DELETE", apiBaseURL, endpoint, token, nil, response)
+func MakeDeleteRequest(apiBaseURL, endpoint, token string, response interface{}) error {
+	return MakeAPIRequest("DELETE", apiBaseURL, endpoint, token, nil, response)
 }
 
 // MakeGetRequest is a helper function to make a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakeGetRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, response interface{}) error {
-	return MakeAPIRequest(l, "GET", apiBaseURL, endpoint, token, nil, response)
+func MakeGetRequest(apiBaseURL, endpoint, token string, response interface{}) error {
+	return MakeAPIRequest("GET", apiBaseURL, endpoint, token, nil, response)
 }
 
 // MakePostRequest is a helper function to make a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakePostRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request, response interface{}) error {
-	return MakeAPIRequest(l, "POST", apiBaseURL, endpoint, token, request, response)
+func MakePostRequest(apiBaseURL, endpoint, token string, request, response interface{}) error {
+	return MakeAPIRequest("POST", apiBaseURL, endpoint, token, request, response)
 }
 
 // MakePutRequest is a helper function to make a PUT request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakePutRequest(l *zap.SugaredLogger, apiBaseURL, endpoint, token string, request, response interface{}) error {
-	return MakeAPIRequest(l, "PUT", apiBaseURL, endpoint, token, request, response)
+func MakePutRequest(apiBaseURL, endpoint, token string, request, response interface{}) error {
+	return MakeAPIRequest("PUT", apiBaseURL, endpoint, token, request, response)
+}
+
+// RunAPIServer attaches logging middleware to the default http server and starts it on the specified port.
+func RunAPIServer(port int) {
+	l := slog.Default().With("action", "Starting api server")
+
+	// mux router
+	mux := http.NewServeMux()
+
+	// Include the default mux in your custom mux
+	mux.Handle("/", http.DefaultServeMux)
+
+	// Middleware
+	l.Info("Setting up middleware for API server")
+	handler := sloghttp.Recovery(mux)
+	handler = sloghttp.New(l)(handler)
+
+	// Start server
+	addr := fmt.Sprintf(":%d", port)
+	l.Info("Starting API server", "port", port)
+	log.Fatal(http.ListenAndServe(addr, handler))
 }

@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/atropos112/gocore/utils"
-	"go.uber.org/zap"
 )
 
 // Client is the interface for the Vikunja API client
@@ -14,20 +13,17 @@ type Client utils.APIClient
 // GetVikunjaAPIClient returns a new Vikunja API client
 func GetVikunjaAPIClient(token, apiURL string) (*Client, error) {
 	// Setting up logging
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	l := logger.Sugar()
 	var err error
 
 	// Get creds
 	if token == "" {
-		token, err = utils.GetCred(l, "ATRO_VIKUNJA_ATROPOS_API_TOKEN")
+		token, err = utils.GetCred("ATRO_VIKUNJA_ATROPOS_API_TOKEN")
 		if err != nil {
 			return nil, err
 		}
 	}
 	if apiURL == "" {
-		apiURL, err = utils.GetCred(l, "ATRO_VIKUNJA_API_URL")
+		apiURL, err = utils.GetCred("ATRO_VIKUNJA_API_URL")
 		if err != nil {
 			return nil, err
 		}
@@ -36,7 +32,6 @@ func GetVikunjaAPIClient(token, apiURL string) (*Client, error) {
 	return &Client{
 		BaseURL: apiURL,
 		Token:   token,
-		Logger:  l,
 	}, nil
 }
 

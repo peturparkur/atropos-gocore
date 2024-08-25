@@ -4,31 +4,12 @@ package vikunja
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
-
-	"github.com/atropos112/gocore/utils"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
-/*
-ConsumeWebhookCallback consumes a webhook callback and calls the callback function for each event
-The typical usage is as follows:
-
-	r := gin.Default()
-	r.POST("/", func(c *gin.Context) {
-		err := ConsumeWebhookCallback(c.Request.Body, func(webhook WebhookCallback) error {
-			// Do something with the webhook
-			return nil
-		})
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
-	}
-*/
-func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback func(webhook WebhookCallback) error) error {
+// ConsumeWebhookCallback consumes a webhook callback and calls the callback function
+func ConsumeWebhookCallback(body io.ReadCloser, callback func(webhook WebhookCallback) error) error {
 	defer body.Close()
 	bytes, err := io.ReadAll(body)
 	if err != nil {
@@ -38,7 +19,6 @@ func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback f
 	// Figure out if it has body and i need to unpack it or its already unpacked
 	obj := map[string]interface{}(nil)
 	if err := json.Unmarshal(bytes, &obj); err != nil {
-		l.Errorw("Failed to unmarshal webhook event", "event", string(bytes))
 		return err
 	}
 
@@ -62,21 +42,37 @@ func ConsumeWebhookCallback(l *zap.SugaredLogger, body io.ReadCloser, callback f
 	return nil
 }
 
-// GinHandler is a helper function to consume a webhook callback with gin
-func GinHandler(l *zap.SugaredLogger, callback func(webhook WebhookCallback) error) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		err := ConsumeWebhookCallback(l, c.Request.Body, callback)
-		if err != nil {
-			if devErr, ok := err.(*utils.DeveloperError); ok {
-				l.Error(devErr)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": devErr.Error()})
-				return
-			}
+// RegisterVikunjaWebhookHandler registers a webhook handler for Vikunja Webhook
+/*
+Typical usage is something like:
+l := utils.GetInitLogger()
 
-			l.Error(err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+if err := vikunja.RegisterVikunjaWebhookHandler("/", SomeWebhookHandler); err != nil {
+	log.Fatal(err)
+}
+
+utils.RunAPIServer(8080)
+*/
+func RegisterVikunjaWebhookHandler(path string, callback func(Webhook WebhookCallback, c *Client) error) error {
+	l := slog.Default().With("path", path)
+	l.Info("Registering vikunja webhook handler")
+
+	c, err := GetVikunjaAPIClient("", "")
+	if err != nil {
+		return err
 	}
+
+	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			err := ConsumeWebhookCallback(r.Body, func(event WebhookCallback) error { return callback(event, c) })
+			if err != nil {
+				l.Error(err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			}
+		} else {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		}
+	})
+
+	return nil
 }
