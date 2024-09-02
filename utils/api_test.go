@@ -13,10 +13,12 @@ func TestSimpleGetReq(t *testing.T) {
 	l := logger.Sugar()
 
 	apiClient := APIClient{
-		BaseURL: "http://postman-echo.com",
-		Token:   "",
-		client:  http.DefaultClient,
-		Logger:  l,
+		APICredentials: APICredentials{
+			BaseURL: "http://postman-echo.com",
+			Token:   "",
+		},
+		client: http.DefaultClient,
+		Logger: l,
 	}
 
 	resp := map[string]interface{}{}
@@ -45,10 +47,12 @@ func TestAccidentalNonPointerResp(t *testing.T) {
 	l := logger.Sugar()
 
 	apiClient := APIClient{
-		BaseURL: "http://postman-echo.com",
-		Token:   "",
-		client:  http.DefaultClient,
-		Logger:  l,
+		APICredentials: APICredentials{
+			BaseURL: "http://postman-echo.com",
+			Token:   "",
+		},
+		client: http.DefaultClient,
+		Logger: l,
 	}
 
 	resp := interface{}(nil)
