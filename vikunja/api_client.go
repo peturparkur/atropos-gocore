@@ -50,7 +50,13 @@ func GetDefaultVikunjaAPIClient(token, apiURL string) (*Client, error) {
 
 // GetVikunjaAPIClient returns a new Vikunja API client
 func GetAtroVikunjaAPIClient(token, apiURL string) (*Client, error) {
-	return GetVikunjaAPIClient(token, apiURL, utils.APICredentials{"ATRO_VIKUNJA_ATROPOS_API_TOKEN", "ATRO_VIKUNJA_API_URL"})
+	return GetVikunjaAPIClient(
+		token,
+		apiURL,
+		utils.APICredentials{
+			BaseURL: "ATRO_VIKUNJA_ATROPOS_API_TOKEN",
+			Token:   "ATRO_VIKUNJA_API_URL",
+		})
 }
 
 // GetProjects returns a list of projects
