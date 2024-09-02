@@ -10,29 +10,36 @@ import (
 // Client is the interface for the Vikunja API client
 type Client utils.APIClient
 
-// GetVikunjaAPIClient returns a new Vikunja API client
-func GetVikunjaAPIClient(token, apiURL string) (*Client, error) {
+func GetVikunjaAPIClient(token, apiURL string, environmentVariables utils.APICredentials) (*Client, error) {
 	// Setting up logging
 	var err error
 
 	// Get creds
 	if token == "" {
-		token, err = utils.GetCred("ATRO_VIKUNJA_ATROPOS_API_TOKEN")
+		token, err = utils.GetCred(environmentVariables.Token)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if apiURL == "" {
-		apiURL, err = utils.GetCred("ATRO_VIKUNJA_API_URL")
+		apiURL, err = utils.GetCred(environmentVariables.BaseURL)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &Client{
-		BaseURL: apiURL,
-		Token:   token,
-	}, nil
+	client := Client(utils.NewAPIClient(apiURL, token))
+	return &client, nil
+}
+
+// GetVikunjaAPIClient returns a new Vikunja API client
+func GetDefaultVikunjaAPIClient(token, apiURL string) (*Client, error) {
+	return GetVikunjaAPIClient(token, apiURL, utils.APICredentials{"VIKUNJA_API_TOKEN", "VIKUNJA_API_URL"})
+}
+
+// GetVikunjaAPIClient returns a new Vikunja API client
+func GetAtroVikunjaAPIClient(token, apiURL string) (*Client, error) {
+	return GetVikunjaAPIClient(token, apiURL, utils.APICredentials{"ATRO_VIKUNJA_ATROPOS_API_TOKEN", "ATRO_VIKUNJA_API_URL"})
 }
 
 // GetProjects returns a list of projects

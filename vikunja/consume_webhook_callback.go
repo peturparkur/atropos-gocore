@@ -57,7 +57,7 @@ func RegisterVikunjaWebhookHandler(path string, callback func(Webhook WebhookCal
 	l := slog.Default().With("path", path)
 	l.Info("Registering vikunja webhook handler")
 
-	c, err := GetVikunjaAPIClient("", "")
+	c, err := GetAtroVikunjaAPIClient("", "")
 	if err != nil {
 		return err
 	}

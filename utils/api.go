@@ -26,7 +26,7 @@ func (e *APIError) Error() string {
 }
 
 // MakeAPIRequest is a generic function to make an API request. It supports GET, POST, PUT, and DELETE requests.
-func MakeAPIRequest(kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
+func MakeAPIRequest(client *http.Client, kind, apiBaseURL, endpoint, token string, request, response interface{}) error {
 	l := slog.Default().With("kind", kind, "apiBaseURL", apiBaseURL, "endpoint", endpoint)
 	// If response is not nil, check its a pointer (easy dev mistake to make).
 	if reflect.ValueOf(response).Kind() != reflect.Ptr {
@@ -69,7 +69,6 @@ func MakeAPIRequest(kind, apiBaseURL, endpoint, token string, request, response 
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -94,23 +93,23 @@ func MakeAPIRequest(kind, apiBaseURL, endpoint, token string, request, response 
 }
 
 // MakeDeleteRequest is a helper function to make a DELETE request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakeDeleteRequest(apiBaseURL, endpoint, token string, response interface{}) error {
-	return MakeAPIRequest("DELETE", apiBaseURL, endpoint, token, nil, response)
+func MakeDeleteRequest(client *http.Client, apiBaseURL, endpoint, token string, response interface{}) error {
+	return MakeAPIRequest(client, "DELETE", apiBaseURL, endpoint, token, nil, response)
 }
 
 // MakeGetRequest is a helper function to make a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakeGetRequest(apiBaseURL, endpoint, token string, response interface{}) error {
-	return MakeAPIRequest("GET", apiBaseURL, endpoint, token, nil, response)
+func MakeGetRequest(client *http.Client, apiBaseURL, endpoint, token string, response interface{}) error {
+	return MakeAPIRequest(client, "GET", apiBaseURL, endpoint, token, nil, response)
 }
 
 // MakePostRequest is a helper function to make a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakePostRequest(apiBaseURL, endpoint, token string, request, response interface{}) error {
-	return MakeAPIRequest("POST", apiBaseURL, endpoint, token, request, response)
+func MakePostRequest(client *http.Client, apiBaseURL, endpoint, token string, request, response interface{}) error {
+	return MakeAPIRequest(client, "POST", apiBaseURL, endpoint, token, request, response)
 }
 
 // MakePutRequest is a helper function to make a PUT request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func MakePutRequest(apiBaseURL, endpoint, token string, request, response interface{}) error {
-	return MakeAPIRequest("PUT", apiBaseURL, endpoint, token, request, response)
+func MakePutRequest(client *http.Client, apiBaseURL, endpoint, token string, request, response interface{}) error {
+	return MakeAPIRequest(client, "PUT", apiBaseURL, endpoint, token, request, response)
 }
 
 // RunAPIServer attaches logging middleware to the default http server and starts it on the specified port.

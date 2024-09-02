@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"net/http"
 	"testing"
 
 	"go.uber.org/zap"
@@ -14,6 +15,7 @@ func TestSimpleGetReq(t *testing.T) {
 	apiClient := APIClient{
 		BaseURL: "http://postman-echo.com",
 		Token:   "",
+		client:  http.DefaultClient,
 		Logger:  l,
 	}
 
@@ -45,6 +47,7 @@ func TestAccidentalNonPointerResp(t *testing.T) {
 	apiClient := APIClient{
 		BaseURL: "http://postman-echo.com",
 		Token:   "",
+		client:  http.DefaultClient,
 		Logger:  l,
 	}
 
