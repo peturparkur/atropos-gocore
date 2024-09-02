@@ -33,8 +33,19 @@ func GetVikunjaAPIClient(token, apiURL string, environmentVariables utils.APICre
 }
 
 // GetVikunjaAPIClient returns a new Vikunja API client
+func GetSimpleVikunjaAPIClient(token, apiURL, envPrefix string) (*Client, error) {
+	return GetVikunjaAPIClient(
+		token,
+		apiURL,
+		utils.APICredentials{
+			BaseURL: envPrefix + "VIKUNJA_API_TOKEN",
+			Token:   envPrefix + "VIKUNJA_API_URL",
+		})
+}
+
+// GetVikunjaAPIClient returns a new Vikunja API client
 func GetDefaultVikunjaAPIClient(token, apiURL string) (*Client, error) {
-	return GetVikunjaAPIClient(token, apiURL, utils.APICredentials{"VIKUNJA_API_TOKEN", "VIKUNJA_API_URL"})
+	return GetSimpleVikunjaAPIClient(token, apiURL, "")
 }
 
 // GetVikunjaAPIClient returns a new Vikunja API client
