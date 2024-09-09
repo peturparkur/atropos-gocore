@@ -162,8 +162,19 @@ func (c *Client) GetAllLabels() ([]Label, error) {
 	apiClient := utils.APIClient(*c)
 	labels := []Label{}
 
-	if err := apiClient.Get("/labels", &labels); err != nil {
-		return nil, err
+	// per_page is limited up to 50 (default is 50) so need to collect all pages
+	pageCount := 1
+	for {
+
+		pagelabels := []Label{}
+		if err := apiClient.Get("/labels?page="+strconv.Itoa(pageCount), &pagelabels); err != nil {
+			return nil, err
+		}
+		if len(pagelabels) == 0 {
+			break
+		}
+		labels = append(labels, pagelabels...)
+		pageCount++
 	}
 
 	return labels, nil
