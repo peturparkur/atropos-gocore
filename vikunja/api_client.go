@@ -192,3 +192,15 @@ func (c *Client) AddLabelToTask(taskID, labelID int) (LabelID, error) {
 
 	return resp, err
 }
+
+func (c *Client) GetUsersOnAProject(projectID int) ([]User, error) {
+	apiClient := utils.APIClient(*c)
+	users := []User{}
+	projectIDstr := strconv.Itoa(projectID)
+
+	if err := apiClient.Get("/projects/"+projectIDstr+"/users", &users); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

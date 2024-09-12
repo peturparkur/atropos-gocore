@@ -45,7 +45,7 @@ type Task struct {
 	Priority               int                      `json:"priority"`
 	StartDate              string                   `json:"start_date"`
 	EndDate                string                   `json:"end_date"`
-	Assignees              interface{}              `json:"assignees"`
+	Assignees              []User                   `json:"assignees"`
 	Labels                 []Label                  `json:"labels"`
 	HexColor               string                   `json:"hex_color"`
 	PercentDone            int                      `json:"percent_done"`
