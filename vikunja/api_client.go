@@ -97,6 +97,17 @@ func (c *Client) UpdateProjectWebhook(projectID int, webhook Webhook) (Webhook, 
 	return res, err
 }
 
+func (c *Client) DeleteProjectWebhook(projectID, webhookID int) (Webhook, error) {
+	apiClient := utils.APIClient(*c)
+	projectIDstr := strconv.Itoa(projectID)
+	webhookIDstr := strconv.Itoa(webhookID)
+
+	resp := Webhook{}
+	err := apiClient.Delete("/projects/"+projectIDstr+"/webhooks/"+webhookIDstr, &resp)
+
+	return resp, err
+}
+
 // GetProjectTasks returns a list of tasks for a project
 func (c *Client) GetProjectTasks(projectID int) ([]Task, error) {
 	apiClient := utils.APIClient(*c)
