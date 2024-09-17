@@ -114,8 +114,19 @@ func (c *Client) GetProjectTasks(projectID int) ([]Task, error) {
 	tasks := []Task{}
 	projectIDstr := strconv.Itoa(projectID)
 
-	if err := apiClient.Get("/projects/"+projectIDstr+"/tasks", &tasks); err != nil {
-		return nil, err
+	tasks = []Task{}
+	pageCount := 1
+	for {
+
+		pageTasks := []Task{}
+		if err := apiClient.Get("/projects/"+projectIDstr+"/tasks?page="+strconv.Itoa(pageCount), &pageTasks); err != nil {
+			return nil, err
+		}
+		if len(pageTasks) == 0 {
+			break
+		}
+		tasks = append(tasks, pageTasks...)
+		pageCount++
 	}
 
 	return tasks, nil

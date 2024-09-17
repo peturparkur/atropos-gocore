@@ -83,9 +83,9 @@ type WebhookCallbackData struct {
 
 // WebhookCallback represents a webhook callback
 type WebhookCallback struct {
-	EventName string              `json:"event_name"`
-	Time      string              `json:"time"`
-	Data      WebhookCallbackData `json:"data"`
+	EventName VikunjaWebhookEventType `json:"event_name"`
+	Time      string                  `json:"time"`
+	Data      WebhookCallbackData     `json:"data"`
 }
 
 type Comment struct {
@@ -111,3 +111,24 @@ type LabelID struct {
 	ID      int    `json:"label_id"`
 	Created string `json:"created,omitempty"`
 }
+
+type VikunjaWebhookEventType string
+
+const (
+	ProjectDeleted        VikunjaWebhookEventType = "project.deleted"
+	TaskAssigneeCreated   VikunjaWebhookEventType = "task.assignee.created"
+	TaskCommentCreated    VikunjaWebhookEventType = "task.comment.created"
+	TaskDeleted           VikunjaWebhookEventType = "task.deleted"
+	TaskRelationCreated   VikunjaWebhookEventType = "task.relation.created"
+	TaskCommentDeleted    VikunjaWebhookEventType = "task.comment.deleted"
+	TaskAssigneeDeleted   VikunjaWebhookEventType = "task.assignee.deleted"
+	ProjectSharedTeam     VikunjaWebhookEventType = "project.shared.team"
+	ProjectSharedUser     VikunjaWebhookEventType = "project.shared.user"
+	TaskAttachmentCreated VikunjaWebhookEventType = "task.attachment.created"
+	TaskCommentEdited     VikunjaWebhookEventType = "task.comment.edited"
+	TaskRelationDeleted   VikunjaWebhookEventType = "task.relation.deleted"
+	TaskUpdated           VikunjaWebhookEventType = "task.updated"
+	TaskCreated           VikunjaWebhookEventType = "task.created"
+	TaskAttachmentDeleted VikunjaWebhookEventType = "task.attachment.deleted"
+	ProjectUpdated        VikunjaWebhookEventType = "project.updated"
+)
