@@ -115,7 +115,7 @@ func MakePutRequest(apiBaseURL, endpoint, token string, request, response interf
 
 // RunAPIServer attaches logging middleware to the default http server and starts it on the specified port.
 func RunAPIServer(port int) {
-	l := slog.Default().With("action", "Starting api server")
+	l := slog.Default()
 
 	// mux router
 	mux := http.NewServeMux()
