@@ -11,6 +11,10 @@
       editorconfig-checker.enable = true;
       govet.enable = true;
       gofmt.enable = true;
+      gen-doc-refs = {
+        enable = true;
+        entry = ''gen-doc-refs '';
+      };
     };
   };
 
@@ -24,6 +28,15 @@
         mkdocs serve
       '';
       description = "Run the documentation server";
+    };
+    gen-doc-refs = {
+      exec = ''
+        CURRENT_DIR=$PWD
+        cd $CURRENT_DIR/vikunja && gomarkdoc --output ../docs/References/Vikunja.md
+        cd $CURRENT_DIR/utils && gomarkdoc --output ../docs/References/Utils.md
+        cd $CURRENT_DIR
+      '';
+      description = "Generate the documentation references";
     };
   };
   languages.go = {
