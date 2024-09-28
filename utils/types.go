@@ -1,4 +1,3 @@
-// Package utils contains utility functions that are used throughout the application.
 package utils
 
 import (

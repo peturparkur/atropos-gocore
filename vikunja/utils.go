@@ -1,4 +1,3 @@
-// Package vikunja contains the types that are used in the Vikunja API
 package vikunja
 
 import (

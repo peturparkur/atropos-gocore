@@ -1,4 +1,3 @@
-// Package vikunja contains the types that are used in the Vikunja API
 package vikunja
 
 // User is a struct that represents a user in Vikunja
