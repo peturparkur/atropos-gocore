@@ -6,9 +6,7 @@ Should certain part of gocore get sizable enough, it will likely be split into i
 
 # Dependencies
 
-The hope is to use as few dependencies as possible. In particular
-
-## Package decisions made
+The hope is to use as few dependencies as possible. In particular the following are used now:
 
 ### Http web framework of choice: [net/http](https://pkg.go.dev/net/http)
 

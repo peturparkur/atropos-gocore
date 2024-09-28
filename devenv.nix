@@ -10,10 +10,13 @@
       check-added-large-files.enable = true;
       editorconfig-checker.enable = true;
       govet.enable = true;
-      gotest.enable = true;
       gofmt.enable = true;
     };
   };
+
+  enterTest = ''
+    go test ./... -race -coverprofile=coverage.out -covermode=atomic
+  '';
 
   scripts = {
     run-docs = {
