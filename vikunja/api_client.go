@@ -2,6 +2,7 @@
 package vikunja
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/atropos112/gocore/utils"
@@ -32,6 +33,7 @@ func GetVikunjaAPIClient(token, apiURL string) (*Client, error) {
 	return &Client{
 		BaseURL: apiURL,
 		Token:   token,
+		Client:  &http.Client{},
 	}, nil
 }
 
