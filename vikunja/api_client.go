@@ -8,7 +8,7 @@ import (
 )
 
 // Client is the interface for the Vikunja API client
-type Client utils.APIClient
+type Client utils.AuthenticatedAPIClient
 
 // GetVikunjaAPIClient returns a new Vikunja API client
 func GetVikunjaAPIClient(token, apiURL string) (*Client, error) {
@@ -17,13 +17,13 @@ func GetVikunjaAPIClient(token, apiURL string) (*Client, error) {
 
 	// Get creds
 	if token == "" {
-		token, err = utils.GetCred("ATRO_VIKUNJA_ATROPOS_API_TOKEN")
+		token, err = utils.GetCred("GOCORE_VIKUNJA_USER_API_TOKEN")
 		if err != nil {
 			return nil, err
 		}
 	}
 	if apiURL == "" {
-		apiURL, err = utils.GetCred("ATRO_VIKUNJA_API_URL")
+		apiURL, err = utils.GetCred("GOCORE_VIKUNJA_API_URL")
 		if err != nil {
 			return nil, err
 		}
@@ -37,7 +37,7 @@ func GetVikunjaAPIClient(token, apiURL string) (*Client, error) {
 
 // GetProjects returns a list of projects
 func (c *Client) GetProjects() ([]Project, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	projects := []Project{}
 
 	if err := apiClient.Get("/projects", &projects); err != nil {
@@ -49,7 +49,7 @@ func (c *Client) GetProjects() ([]Project, error) {
 
 // GetProject returns a specific project
 func (c *Client) GetProject(projectID int) (Project, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	project := Project{}
 	projectIDstr := strconv.Itoa(projectID)
 
@@ -62,7 +62,7 @@ func (c *Client) GetProject(projectID int) (Project, error) {
 
 // GetProjectWebhooks returns a list of webhooks for a project
 func (c *Client) GetProjectWebhooks(projectID int) ([]Webhook, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	webhooks := []Webhook{}
 	projectIDstr := strconv.Itoa(projectID)
 
@@ -75,7 +75,7 @@ func (c *Client) GetProjectWebhooks(projectID int) ([]Webhook, error) {
 
 // CreateProjectWebhook creates a webhook for a project
 func (c *Client) CreateProjectWebhook(projectID int, webhook Webhook) (Webhook, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	webhookRes := Webhook{}
 	projectIDstr := strconv.Itoa(projectID)
 
@@ -88,7 +88,7 @@ func (c *Client) CreateProjectWebhook(projectID int, webhook Webhook) (Webhook, 
 
 // UpdateProjectWebhook updates a webhook for a project, only can update events (nothing else)
 func (c *Client) UpdateProjectWebhook(projectID int, webhook Webhook) (Webhook, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	projectIDstr := strconv.Itoa(projectID)
 
 	res := Webhook{}
@@ -97,8 +97,9 @@ func (c *Client) UpdateProjectWebhook(projectID int, webhook Webhook) (Webhook, 
 	return res, err
 }
 
+// DeleteProjectWebhook deletes a webhook for a project
 func (c *Client) DeleteProjectWebhook(projectID, webhookID int) (Webhook, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	projectIDstr := strconv.Itoa(projectID)
 	webhookIDstr := strconv.Itoa(webhookID)
 
@@ -110,7 +111,7 @@ func (c *Client) DeleteProjectWebhook(projectID, webhookID int) (Webhook, error)
 
 // GetProjectTasks returns a list of tasks for a project
 func (c *Client) GetProjectTasks(projectID int) ([]Task, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	tasks := []Task{}
 	projectIDstr := strconv.Itoa(projectID)
 
@@ -134,7 +135,7 @@ func (c *Client) GetProjectTasks(projectID int) ([]Task, error) {
 
 // UpdateProject updates a project
 func (c *Client) UpdateProject(project Project) (Project, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	projectIDstr := strconv.Itoa(project.ID)
 
 	res := Project{}
@@ -145,7 +146,7 @@ func (c *Client) UpdateProject(project Project) (Project, error) {
 
 // GetTaskComments returns a list of comments for a task
 func (c *Client) GetTaskComments(taskID int) ([]Comment, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	comments := []Comment{}
 	taskIDstr := strconv.Itoa(taskID)
 
@@ -158,7 +159,7 @@ func (c *Client) GetTaskComments(taskID int) ([]Comment, error) {
 
 // GetTask returns a task
 func (c *Client) GetTask(taskID int) (Task, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	task := Task{}
 	taskIDstr := strconv.Itoa(taskID)
 
@@ -171,7 +172,7 @@ func (c *Client) GetTask(taskID int) (Task, error) {
 
 // UpdateTask updates a task
 func (c *Client) UpdateTask(task Task) (Task, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	resp := Task{}
 	taskIDstr := strconv.Itoa(task.ID)
 
@@ -180,8 +181,9 @@ func (c *Client) UpdateTask(task Task) (Task, error) {
 	return resp, err
 }
 
+// GetAllLabels returns a list of labels for a task
 func (c *Client) GetAllLabels() ([]Label, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	labels := []Label{}
 
 	// per_page is limited up to 50 (default is 50) so need to collect all pages
@@ -202,8 +204,9 @@ func (c *Client) GetAllLabels() ([]Label, error) {
 	return labels, nil
 }
 
+// AddLabelToTask adds a label to a task
 func (c *Client) AddLabelToTask(taskID, labelID int) (LabelID, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	taskIDstr := strconv.Itoa(taskID)
 
 	req := LabelID{
@@ -215,8 +218,9 @@ func (c *Client) AddLabelToTask(taskID, labelID int) (LabelID, error) {
 	return resp, err
 }
 
+// GetUsersOnAProject returns a list of users added to a project
 func (c *Client) GetUsersOnAProject(projectID int) ([]User, error) {
-	apiClient := utils.APIClient(*c)
+	apiClient := utils.AuthenticatedAPIClient(*c)
 	users := []User{}
 	projectIDstr := strconv.Itoa(projectID)
 

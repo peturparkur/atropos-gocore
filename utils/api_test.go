@@ -2,20 +2,10 @@ package utils
 
 import (
 	"testing"
-
-	"go.uber.org/zap"
 )
 
 func TestSimpleGetReq(t *testing.T) {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	l := logger.Sugar()
-
-	apiClient := APIClient{
-		BaseURL: "http://postman-echo.com",
-		Token:   "",
-		Logger:  l,
-	}
+	apiClient := NewAPIClient("http://postman-echo.com", "")
 
 	resp := map[string]interface{}{}
 	if err := apiClient.Get("/get", &resp); err != nil {
@@ -38,15 +28,7 @@ func TestSimpleGetReq(t *testing.T) {
 }
 
 func TestAccidentalNonPointerResp(t *testing.T) {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	l := logger.Sugar()
-
-	apiClient := APIClient{
-		BaseURL: "http://postman-echo.com",
-		Token:   "",
-		Logger:  l,
-	}
+	apiClient := NewAPIClient("http://postman-echo.com", "")
 
 	resp := interface{}(nil)
 	err := apiClient.Get("/get", resp)

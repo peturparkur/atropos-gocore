@@ -3,32 +3,43 @@ package utils
 
 import (
 	"fmt"
+	"net/http"
 )
 
-// APIClient is a struct that contains the base URL of the API and the token to use for requests.
-type APIClient struct {
+// AuthenticatedAPIClient is a struct that contains the base URL of the API and the token to use for requests.
+type AuthenticatedAPIClient struct {
 	BaseURL string
 	Token   string
+	client  *http.Client
+}
+
+// NewAPIClient creates a new AuthenticatedAPIClient with the specified base URL and token.
+func NewAPIClient(baseURL, token string) AuthenticatedAPIClient {
+	return AuthenticatedAPIClient{
+		BaseURL: baseURL,
+		Token:   token,
+		client:  http.DefaultClient,
+	}
 }
 
 // Delete is a helper function to make a DELETE request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func (c *APIClient) Delete(endpoint string, response interface{}) error {
-	return MakeDeleteRequest(c.BaseURL, endpoint, c.Token, response)
+func (c *AuthenticatedAPIClient) Delete(endpoint string, response interface{}) error {
+	return MakeDeleteRequest(c.client, c.BaseURL, endpoint, c.Token, response)
 }
 
 // Get is a helper function to make a GET request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func (c *APIClient) Get(endpoint string, response interface{}) error {
-	return MakeGetRequest(c.BaseURL, endpoint, c.Token, response)
+func (c *AuthenticatedAPIClient) Get(endpoint string, response interface{}) error {
+	return MakeGetRequest(c.client, c.BaseURL, endpoint, c.Token, response)
 }
 
 // Post is a helper function to make a POST request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func (c *APIClient) Post(endpoint string, request, response interface{}) error {
-	return MakePostRequest(c.BaseURL, endpoint, c.Token, request, response)
+func (c *AuthenticatedAPIClient) Post(endpoint string, request, response interface{}) error {
+	return MakePostRequest(c.client, c.BaseURL, endpoint, c.Token, request, response)
 }
 
 // Put is a helper function to make a PUT request to the specified endpoint. If token is not "" it will be added to the request as a Bearer token.
-func (c *APIClient) Put(endpoint string, request, response interface{}) error {
-	return MakePutRequest(c.BaseURL, endpoint, c.Token, request, response)
+func (c *AuthenticatedAPIClient) Put(endpoint string, request, response interface{}) error {
+	return MakePutRequest(c.client, c.BaseURL, endpoint, c.Token, request, response)
 }
 
 // NoCredFoundError represents an error when no credentials are found
@@ -40,6 +51,7 @@ func (e *NoCredFoundError) Error() string {
 	return fmt.Sprintf("no credentials found for %s", e.CredentialName)
 }
 
+// DeveloperError represents an error that is caused by a developer mistake
 type DeveloperError struct {
 	Message string
 }
@@ -48,6 +60,7 @@ func (e *DeveloperError) Error() string {
 	return fmt.Sprintf("developer error: %s", e.Message)
 }
 
+// GPTDoesntListenError represents an error when GPT doesn't listen
 type GPTDoesntListenError struct {
 	UserMessage string
 	SysMessage  string
