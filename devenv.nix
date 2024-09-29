@@ -32,8 +32,8 @@
     gen-doc-refs = {
       exec = ''
         CURRENT_DIR=$PWD
-        cd $CURRENT_DIR/vikunja && gomarkdoc --output ../docs/References/Vikunja.md
-        cd $CURRENT_DIR/utils && gomarkdoc --output ../docs/References/Utils.md
+        cd $CURRENT_DIR/vikunja && gomarkdoc --output ../docs/Vikunja.md
+        cd $CURRENT_DIR/utils && gomarkdoc --output ../docs/Utils.md
         cd $CURRENT_DIR
       '';
       description = "Generate the documentation references";
